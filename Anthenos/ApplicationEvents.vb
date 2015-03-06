@@ -3,6 +3,8 @@ Imports System.Data
 Imports System.Data.OleDb
 Imports System.Data.SqlClient
 
+
+
 Namespace My
 
     ' The following events are available for MyApplication:
@@ -13,16 +15,30 @@ Namespace My
     ' StartupNextInstance: Raised when launching a single-instance application and the application is already active. 
     ' NetworkAvailabilityChanged: Raised when the network connection is connected or disconnected.
     Partial Friend Class MyApplication
+        ' this boolean indicates a logged in user
         Public LoginVal As Boolean = False
+        ' start and current time values
+        Public start_t, cur_t As DateTime
+        ' session duration
+        Public elasped As TimeSpan
 
-
+        Private Sub MyApplication_NetworkAvailabilityChanged(sender As Object, e As Devices.NetworkAvailableEventArgs) Handles Me.NetworkAvailabilityChanged
+            Console.Write("Network Availabilty Change")
+        End Sub
     End Class
 
     Public Class MyDatabase
         Private con As OleDbConnection = New OleDbConnection()
         Public Sub openDb()
-            con.ConnectionString = Anthenos.My.MySettings.Default.anthenosConnectionString
-            con.Open()
+            If con.State = ConnectionState.Closed Then
+                Try
+                    con.ConnectionString = Anthenos.My.MySettings.Default.anthenosConnectionString
+                    con.Open()
+                Catch e As Exception
+                    MsgBox(e.Message, MsgBoxStyle.Critical, "Athenos Error!")
+
+                End Try
+            End If
         End Sub
 
         Public Function query(ByVal sql As String) As DataSet
